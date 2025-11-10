@@ -1,5 +1,5 @@
-// Fix: Switch to default import for express to resolve type conflicts.
-import express from 'express';
+// Fix: Switch to default import for express and import Request, Response types to resolve type conflicts.
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import db from './db.js';
@@ -39,8 +39,8 @@ app.use(express.json());
 
 // --- API ROUTES ---
 
-// Fix: Use express.Request and express.Response types from express namespace.
-app.post('/api/register', async (req: express.Request, res: express.Response) => {
+// Fix: Use Request and Response types from express.
+app.post('/api/register', async (req: Request, res: Response) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
@@ -69,8 +69,8 @@ app.post('/api/register', async (req: express.Request, res: express.Response) =>
 });
 
 
-// Fix: Use express.Request and express.Response types from express namespace.
-app.post('/api/login', async (req: express.Request, res: express.Response) => {
+// Fix: Use Request and Response types from express.
+app.post('/api/login', async (req: Request, res: Response) => {
     const { email, password } = req.body;
      if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
@@ -99,8 +99,8 @@ app.post('/api/login', async (req: express.Request, res: express.Response) => {
 });
 
 // A protected route to check session
-// Fix: Use express.Request and express.Response types from express namespace.
-app.get('/api/session', (req: express.Request, res: express.Response) => {
+// Fix: Use Request and Response types from express.
+app.get('/api/session', (req: Request, res: Response) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
@@ -116,8 +116,8 @@ app.get('/api/session', (req: express.Request, res: express.Response) => {
 });
 
 // Health check route for Render
-// Fix: Use express.Request and express.Response types from express namespace.
-app.get('/api/health', (req: express.Request, res: express.Response) => {
+// Fix: Use Request and Response types from express.
+app.get('/api/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'ok' });
 });
 

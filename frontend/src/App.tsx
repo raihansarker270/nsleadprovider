@@ -1,6 +1,6 @@
 // Fix: Add Vite client types to resolve issues with import.meta.env.
 // The /// <reference> directive was removed as it was causing a type definition resolution error.
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 // --- Type Definitions ---
