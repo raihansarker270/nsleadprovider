@@ -1,10 +1,12 @@
 // Fix: Replaced placeholder content with a valid server implementation.
 // Fix: Add explicit types for Express Request and Response to resolve type inference issues.
-import express, { Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import db from './db.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
 
 // Placeholder for future API route imports
 // import authRoutes from './api/auth';
@@ -16,55 +18,106 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-that-is-long';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
+/*
+IMPORTANT: Before running, ensure you have a 'users' table in your PostgreSQL database.
+You can create it with the following SQL command:
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+*/
 
 app.use(cors());
 app.use(express.json());
 
 // --- API ROUTES ---
-// In a real application, these would be in separate files.
-// For simplicity, we are placing placeholder logic here.
 
-// Mock user store
-const users: any[] = []; 
-
-app.post('/api/register', async (req: Request, res: Response) => {
-    // In a real app, you'd hash the password with bcrypt
+// Fix: Use express.Request and express.Response for proper type inference.
+app.post('/api/register', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
-    if (users.find(u => u.email === email)) {
-        return res.status(400).json({ message: 'User already exists' });
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
     }
-    const newUser = { id: Date.now(), email, password }; // Don't store plain passwords!
-    users.push(newUser);
-    // In a real app, you'd return a JWT
-    res.status(201).json({ message: 'User registered successfully', token: 'fake-jwt-token' });
+
+    try {
+        const existingUser = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (existingUser.rows.length > 0) {
+            return res.status(400).json({ message: 'User with this email already exists' });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const newUser = await db.query(
+            'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email',
+            [email, passwordHash]
+        );
+        
+        const token = jwt.sign({ userId: newUser.rows[0].id, email: newUser.rows[0].email }, JWT_SECRET, { expiresIn: '1d' });
+
+        res.status(201).json({ message: 'User registered successfully', token });
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ message: 'Server error during registration' });
+    }
 });
 
 
-app.post('/api/login', async (req: Request, res: Response) => {
+// Fix: Use express.Request and express.Response for proper type inference.
+app.post('/api/login', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
-    const user = users.find(u => u.email === email && u.password === password);
-    if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+     if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
     }
-    res.json({ message: 'Login successful', token: 'fake-jwt-token' });
+
+    try {
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (result.rows.length === 0) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+        const user = result.rows[0];
+
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1d' });
+        
+        res.json({ message: 'Login successful', token });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Server error during login' });
+    }
 });
 
 // A protected route to check session
-app.get('/api/session', (req: Request, res: Response) => {
-    // In a real app, you'd verify a JWT from the Authorization header
-    const token = req.headers.authorization?.split(' ')[1];
-    if (token === 'fake-jwt-token') {
+// Fix: Use express.Request and express.Response for proper type inference.
+app.get('/api/session', (req: express.Request, res: express.Response) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.json({ loggedIn: false });
+        }
+        
+        jwt.verify(token, JWT_SECRET);
         res.json({ loggedIn: true });
-    } else {
+
+    } catch (error) {
         res.json({ loggedIn: false });
     }
 });
 
 // Health check route for Render
-app.get('/api/health', (req: Request, res: Response) => {
+// Fix: Use express.Request and express.Response for proper type inference.
+app.get('/api/health', (req: express.Request, res: express.Response) => {
   res.status(200).send('OK');
 });
 
