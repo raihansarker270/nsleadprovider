@@ -1,5 +1,5 @@
-// Fix: Switch to default import for express and import Request, Response types to resolve type conflicts.
-import express, { Request, Response } from 'express';
+// Fix: Use a default import for express to resolve type conflicts.
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import db from './db.js';
@@ -15,10 +15,22 @@ import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
-// Fix: Explicitly type `app` as `express.Express` to ensure correct type inference for middleware and route handlers.
-const app: express.Express = express();
+// --- Environment Variable Check ---
+// Ensures the server fails fast if essential configuration is missing.
+const requiredEnvVars = ['DATABASE_URL', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+    console.error(`FATAL ERROR: Missing required environment variables: ${missingEnvVars.join(', ')}`);
+    console.error('Please set these variables in your deployment environment.');
+    process.exit(1); // Exit with a non-zero code to indicate failure
+}
+
+
+// Rely on type inference for the express app.
+const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-that-is-long';
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 
 /*
@@ -40,7 +52,7 @@ app.use(express.json());
 // --- API ROUTES ---
 
 // Fix: Use Request and Response types from express.
-app.post('/api/register', async (req: Request, res: Response) => {
+app.post('/api/register', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
@@ -70,7 +82,7 @@ app.post('/api/register', async (req: Request, res: Response) => {
 
 
 // Fix: Use Request and Response types from express.
-app.post('/api/login', async (req: Request, res: Response) => {
+app.post('/api/login', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
      if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
@@ -100,7 +112,7 @@ app.post('/api/login', async (req: Request, res: Response) => {
 
 // A protected route to check session
 // Fix: Use Request and Response types from express.
-app.get('/api/session', (req: Request, res: Response) => {
+app.get('/api/session', (req: express.Request, res: express.Response) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
@@ -117,7 +129,7 @@ app.get('/api/session', (req: Request, res: Response) => {
 
 // Health check route for Render
 // Fix: Use Request and Response types from express.
-app.get('/api/health', (req: Request, res: Response) => {
+app.get('/api/health', (req: express.Request, res: express.Response) => {
     res.status(200).json({ status: 'ok' });
 });
 

@@ -1,7 +1,7 @@
 
 
-// Fix: Switch to default import for express and import Request, Response types to resolve type conflicts.
-import express, { Request, Response } from 'express';
+// Fix: Use a default import for express to resolve type conflicts.
+import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -15,8 +15,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Fix: Explicitly type `app` as `express.Express` to ensure correct type inference for middleware and route handlers.
-const app: express.Express = express();
+// Rely on type inference for the express app.
+const app = express();
 const PORT = process.env.PORT || 3001;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +37,7 @@ app.use(express.static(path.join(__dirname, '..', 'dist')));
 const users: any[] = []; 
 
 // Fix: Use Request and Response types from express.
-app.post('/api/register', async (req: Request, res: Response) => {
+app.post('/api/register', async (req: express.Request, res: express.Response) => {
     // In a real app, you'd hash the password with bcrypt
     const { email, password } = req.body;
     if (users.find(u => u.email === email)) {
@@ -51,7 +51,7 @@ app.post('/api/register', async (req: Request, res: Response) => {
 
 
 // Fix: Use Request and Response types from express.
-app.post('/api/login', async (req: Request, res: Response) => {
+app.post('/api/login', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
     const user = users.find(u => u.email === email && u.password === password);
     if (!user) {
@@ -62,7 +62,7 @@ app.post('/api/login', async (req: Request, res: Response) => {
 
 // A protected route to check session
 // Fix: Use Request and Response types from express.
-app.get('/api/session', (req: Request, res: Response) => {
+app.get('/api/session', (req: express.Request, res: express.Response) => {
     // In a real app, you'd verify a JWT from the Authorization header
     const token = req.headers.authorization?.split(' ')[1];
     if (token === 'fake-jwt-token') {
@@ -76,7 +76,7 @@ app.get('/api/session', (req: Request, res: Response) => {
 // The "catchall" handler: for any request that doesn't match one above,
 // send back React's index.html file.
 // Fix: Use Request and Response types from express.
-app.get('*', (req: Request, res: Response) => {
+app.get('*', (req: express.Request, res: express.Response) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
