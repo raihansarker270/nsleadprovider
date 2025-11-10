@@ -13,7 +13,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const app = express();
+// Fix: Explicitly type `app` as `express.Express` to ensure correct type inference for middleware and route handlers.
+const app: express.Express = express();
 const PORT = process.env.PORT || 3001;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,7 +34,6 @@ app.use(express.static(path.join(__dirname, '..', 'dist')));
 // Mock user store
 const users: any[] = []; 
 
-// Fix: Use express.Request and express.Response for proper type inference.
 app.post('/api/register', async (req: express.Request, res: express.Response) => {
     // In a real app, you'd hash the password with bcrypt
     const { email, password } = req.body;
@@ -47,7 +47,6 @@ app.post('/api/register', async (req: express.Request, res: express.Response) =>
 });
 
 
-// Fix: Use express.Request and express.Response for proper type inference.
 app.post('/api/login', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
     const user = users.find(u => u.email === email && u.password === password);
@@ -58,7 +57,6 @@ app.post('/api/login', async (req: express.Request, res: express.Response) => {
 });
 
 // A protected route to check session
-// Fix: Use express.Request and express.Response for proper type inference.
 app.get('/api/session', (req: express.Request, res: express.Response) => {
     // In a real app, you'd verify a JWT from the Authorization header
     const token = req.headers.authorization?.split(' ')[1];
@@ -72,7 +70,6 @@ app.get('/api/session', (req: express.Request, res: express.Response) => {
 
 // The "catchall" handler: for any request that doesn't match one above,
 // send back React's index.html file.
-// Fix: Use express.Request and express.Response for proper type inference.
 app.get('*', (req: express.Request, res: express.Response) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });

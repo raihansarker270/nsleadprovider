@@ -1,5 +1,6 @@
 // Fix: Replaced placeholder content with a valid server implementation.
 // Fix: Add explicit types for Express Request and Response to resolve type inference issues.
+// Fix: Import Express type and apply it to the app instance.
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -16,7 +17,8 @@ import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
-const app = express();
+// Fix: Explicitly type `app` as `express.Express` to ensure correct type inference for middleware and route handlers.
+const app: express.Express = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-that-is-long';
 
@@ -118,10 +120,9 @@ app.get('/api/session', (req: express.Request, res: express.Response) => {
 // Health check route for Render
 // Fix: Use express.Request and express.Response for proper type inference.
 app.get('/api/health', (req: express.Request, res: express.Response) => {
-  res.status(200).send('OK');
+    res.status(200).json({ status: 'ok' });
 });
 
-
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+    console.log(`Server listening on port ${PORT}`);
 });

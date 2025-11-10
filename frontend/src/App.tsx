@@ -1,4 +1,5 @@
-// Fix: Replaced placeholder content with the actual App component implementation.
+// Fix: Add Vite client types to resolve issues with import.meta.env.
+/// <reference types="vite/client" />
 import React, { useState, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 
@@ -17,6 +18,9 @@ interface Order {
   date: string;
   items: CartItem[];
 }
+
+// Base URL for the API, configured via environment variables for deployment flexibility.
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 
 // --- SVG Icon Components ---
@@ -511,7 +515,7 @@ function App() {
                 const token = localStorage.getItem('token');
                 if (token) {
                      // In a real app, you would verify the token with the backend
-                     const response = await fetch('/api/session', {
+                     const response = await fetch(`${API_BASE_URL}/api/session`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                      });
                      const data = await response.json();
@@ -536,8 +540,9 @@ function App() {
     const handleCloseAuthModal = () => setAuthModalOpen(false);
     
     const handleAuthSuccess = async (email: string, password: string, isRegister: boolean) => {
-        const endpoint = isRegister ? '/api/register' : '/api/login';
+        const endpoint = isRegister ? `${API_BASE_URL}/api/register` : `${API_BASE_URL}/api/login`;
         try {
+            setError(null); // Clear previous errors on a new attempt
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

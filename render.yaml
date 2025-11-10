@@ -4,6 +4,12 @@ services:
     rootDir: frontend
     buildCommand: npm install && npm run build
     publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: nsleadprovider-backend
+          property: url
     routes:
       - type: rewrite
         source: /*
