@@ -63,12 +63,12 @@ const Header = ({ onGetStarted, isLoggedIn, onLogout, onCartClick, cartItemCount
                 <span className="text-yellow-500">⭐</span> Nsleadprovider
             </div>
             <nav className="hidden md:flex space-x-8 items-center">
-                <a href="#" className="text-gray-600 hover:text-indigo-600">Our Clients</a>
+                <a href="#clients" className="text-gray-600 hover:text-indigo-600">Our Clients</a>
                 <a href="#" className="text-gray-600 hover:text-indigo-600">Process</a>
-                <a href="#" className="text-gray-600 hover:text-indigo-600">Our Work</a>
+                <a href="#work" className="text-gray-600 hover:text-indigo-600">Our Work</a>
                 <a href="#" className="text-gray-600 hover:text-indigo-600">Pricing</a>
                 <a href="#" className="text-gray-600 hover:text-indigo-600">FAQs</a>
-                <a href="#" className="text-gray-600 hover:text-indigo-600">Reviews</a>
+                <a href="#reviews" className="text-gray-600 hover:text-indigo-600">Reviews</a>
             </nav>
             <div>
                 {isLoggedIn ? (
@@ -140,8 +140,8 @@ const Stats = () => (
     </section>
 );
 
-const CelebrityClients = () => (
-    <section className="py-20 bg-gray-50">
+const CelebrityClients = ({ id }: { id?: string }) => (
+    <section id={id} className="py-20 bg-gray-50">
         <div className="container mx-auto px-6 text-center">
             <h2 className="text-3xl font-bold mb-2">Our Celebrity Clients</h2>
             <p className="text-gray-600 mb-12">You must be familiar with them, right? We're helping their businesses with our services.</p>
@@ -221,8 +221,8 @@ const WhatWeOffer = () => (
     </section>
 );
 
-const OurWork = () => (
-    <section className="py-20 bg-white">
+const OurWork = ({ id }: { id?: string }) => (
+    <section id={id} className="py-20 bg-white">
         <div className="container mx-auto px-6 text-center">
             <h2 className="text-3xl font-bold mb-8">Our Work</h2>
             <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -252,8 +252,8 @@ const About = () => (
     </section>
 );
 
-const HappyClients = () => (
-    <section className="py-20 bg-white">
+const HappyClients = ({ id }: { id?: string }) => (
+    <section id={id} className="py-20 bg-white">
         <div className="container mx-auto px-6 text-center">
             <h2 className="text-3xl font-bold mb-2">Our Happy Clients?</h2>
             <div className="w-20 h-1 bg-indigo-600 mx-auto mb-4"></div>
@@ -332,30 +332,35 @@ const Footer = () => (
     </footer>
 );
 
-const AuthModal = ({ onClose, onAuthSuccess }: { onClose: () => void, onAuthSuccess: () => void }) => {
-    // Simulated auth
-    const handleAuth = (e: React.FormEvent) => {
+const AuthModal = ({ onClose, onAuthSuccess }: { onClose: () => void, onAuthSuccess: (email: string, pass: string, isRegister: boolean) => void }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isRegister, setIsRegister] = useState(false);
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onAuthSuccess();
+        onAuthSuccess(email, password, isRegister);
     };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md relative">
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
-                <h2 className="text-2xl font-bold text-center mb-6">Welcome!</h2>
-                <form onSubmit={handleAuth}>
+                <h2 className="text-2xl font-bold text-center mb-6">{isRegister ? 'Create Account' : 'Welcome Back!'}</h2>
+                <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-gray-700 mb-2" htmlFor="email">Email Address</label>
-                        <input className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" type="email" id="email" placeholder="you@example.com" required />
+                        <input className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" type="email" value={email} onChange={e => setEmail(e.target.value)} id="email" placeholder="you@example.com" required />
                     </div>
                     <div className="mb-6">
                         <label className="block text-gray-700 mb-2" htmlFor="password">Password</label>
-                        <input className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" type="password" id="password" placeholder="********" required />
+                        <input className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" type="password" value={password} onChange={e => setPassword(e.target.value)} id="password" placeholder="********" required />
                     </div>
                     <div className="flex flex-col gap-4">
-                         <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">Login</button>
-                         <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">Register</button>
+                         <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">{isRegister ? 'Register' : 'Login'}</button>
+                         <button type="button" onClick={() => setIsRegister(!isRegister)} className="w-full text-indigo-600 hover:underline">
+                            {isRegister ? 'Already have an account? Login' : "Don't have an account? Register"}
+                         </button>
                     </div>
                 </form>
             </div>
@@ -480,6 +485,13 @@ const CheckoutSuccessModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
     );
 }
 
+const LoadingSpinner = () => (
+    <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-600"></div>
+    </div>
+);
+
+
 // --- Main App Component ---
 function App() {
     const [isAuthModalOpen, setAuthModalOpen] = useState(false);
@@ -488,20 +500,71 @@ function App() {
     const [isCartModalOpen, setCartModalOpen] = useState(false);
     const [isCheckoutSuccessOpen, setCheckoutSuccessOpen] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Check session on initial load
+    useEffect(() => {
+        const checkSession = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                     // In a real app, you would verify the token with the backend
+                     const response = await fetch('/api/session', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                     });
+                     const data = await response.json();
+                     if (data.loggedIn) {
+                        setLoggedIn(true);
+                        // In a real app, fetch cart and orders here
+                     } else {
+                        localStorage.removeItem('token');
+                     }
+                }
+            } catch (err) {
+                 console.error("Session check failed:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        checkSession();
+    }, []);
 
 
     const handleGetStarted = () => setAuthModalOpen(true);
     const handleCloseAuthModal = () => setAuthModalOpen(false);
-    const handleAuthSuccess = () => {
-        setLoggedIn(true);
-        setAuthModalOpen(false);
-    };
-    const handleLogout = () => {
-        setLoggedIn(false);
-        setCart([]); // Clear cart on logout
-        setOrders([]); // Clear order history on logout
+    
+    const handleAuthSuccess = async (email: string, password: string, isRegister: boolean) => {
+        const endpoint = isRegister ? '/api/register' : '/api/login';
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                setLoggedIn(true);
+                setAuthModalOpen(false);
+                 // In a real app, fetch cart and orders here
+            } else {
+                throw new Error(data.message || 'Authentication failed');
+            }
+        } catch (err: any) {
+            setError(err.message);
+            console.error(err);
+        }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setLoggedIn(false);
+        setCart([]); 
+        setOrders([]); 
+    };
+
+    // --- Mock API calls for cart and orders since backend is simplified ---
     const handleAddToCart = (service: Service) => {
         if (!cart.some(item => item.id === service.id)) {
             setCart([...cart, service]);
@@ -510,8 +573,6 @@ function App() {
     const handleRemoveFromCart = (id: number) => {
         setCart(cart.filter(item => item.id !== id));
     };
-
-
 
     const handleCheckout = () => {
         const newOrder: Order = {
@@ -525,6 +586,10 @@ function App() {
         setCheckoutSuccessOpen(true);
     }
 
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
+
     return (
         <div className="bg-white">
             <Header
@@ -534,6 +599,7 @@ function App() {
                 onCartClick={() => setCartModalOpen(true)}
                 cartItemCount={cart.length}
              />
+             {error && <div className="bg-red-500 text-white p-4 text-center">{error}</div>}
             <main>
                 {isLoggedIn ? (
                     <>
@@ -545,13 +611,13 @@ function App() {
                    <>
                         <Hero />
                         <Stats />
-                        <CelebrityClients />
+                        <CelebrityClients id="clients" />
                         <WhoWeHelp />
                         <TrustedClients />
                         <WhatWeOffer />
-                        <OurWork />
+                        <OurWork id="work" />
                         <About />
-                        <HappyClients />
+                        <HappyClients id="reviews" />
                         <FreePilotCTA />
                    </>
                 )}
