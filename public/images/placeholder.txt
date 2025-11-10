@@ -1,0 +1,1 @@
+This folder is for storing website images. Please add your image files here and reference them using relative paths starting with '/images/' in the code. For example, place 'hero-team.png' in this folder and use the path '/images/hero-team.png' in your components.

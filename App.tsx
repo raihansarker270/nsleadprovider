@@ -41,17 +41,17 @@ const CartIcon = ({ itemCount }: { itemCount: number }) => (
 
 // --- Data ---
 const services: Service[] = [
-    { id: 1, title: 'Targeted Custom Contact List Building', description: 'Transform your outreach with our expertly curated, high-quality prospect contact lists.', image: 'https://i.imgur.com/x1Y4X5g.png' },
-    { id: 2, title: 'Data Entry & Web Research', description: 'Our Data Entry & Web Research service offers precise data finding & input.', image: 'https://i.imgur.com/dXT8Z1r.png' },
-    { id: 3, title: 'CRM Data Appending & Enrichment', description: 'Supercharge your CRM with our specialized email and phone number enrichment services.', image: 'https://i.imgur.com/o5IT50N.png' },
-    { id: 4, title: 'Verified Email Finding', description: 'Unlock verified email discovery with our specialized service.', image: 'https://i.imgur.com/6Yvj9zM.png' },
-    { id: 5, title: 'Phone Number Finding', description: 'Discover verified phone numbers with our dedicated service.', image: 'https://i.imgur.com/v2Z2V3h.png' },
-    { id: 6, title: 'Hire Dedicated Research Team', description: 'Expand your reach with our dedicated research team focused on prospect contact data.', image: 'https://i.imgur.com/cO1aG8y.png' },
-    { id: 7, title: 'God Level Email Validation', description: 'Ensure flawless email validation with our ‘God Level’ service by sending test email 1 by 1 from public server.', image: 'https://i.imgur.com/rG7P7zN.png' },
-    { id: 8, title: 'Email Personalization', description: 'We specialize in writing captivating opening lines for personalized emails.', image: 'https://i.imgur.com/aB3c8zV.png' },
-    { id: 9, title: 'Apollo Data Scrapping', description: 'Get hassle-free Apollo.io data export, reformatting, cleaning, and validation at an unbeatable price!', image: 'https://i.imgur.com/j4D7k9p.png' },
-    { id: 10, title: 'Done-For-You Cold Email Outreach', description: 'Effortlessly execute cold email outreach with our ‘Done-For-You’ service.', image: 'https://i.imgur.com/y0S4Z6G.png' },
-    { id: 11, title: 'Done-For-You Linkedin Outreach', description: 'Transform your outreach with our ‘Done-For-You’ Linkedin outreach service.', image: 'https://i.imgur.com/Q9y5S2n.png' },
+    { id: 1, title: 'Targeted Custom Contact List Building', description: 'Transform your outreach with our expertly curated, high-quality prospect contact lists.', image: '/images/services/service-1.png' },
+    { id: 2, title: 'Data Entry & Web Research', description: 'Our Data Entry & Web Research service offers precise data finding & input.', image: '/images/services/service-2.png' },
+    { id: 3, title: 'CRM Data Appending & Enrichment', description: 'Supercharge your CRM with our specialized email and phone number enrichment services.', image: '/images/services/service-3.png' },
+    { id: 4, title: 'Verified Email Finding', description: 'Unlock verified email discovery with our specialized service.', image: '/images/services/service-4.png' },
+    { id: 5, title: 'Phone Number Finding', description: 'Discover verified phone numbers with our dedicated service.', image: '/images/services/service-5.png' },
+    { id: 6, title: 'Hire Dedicated Research Team', description: 'Expand your reach with our dedicated research team focused on prospect contact data.', image: '/images/services/service-6.png' },
+    { id: 7, title: 'God Level Email Validation', description: 'Ensure flawless email validation with our ‘God Level’ service by sending test email 1 by 1 from public server.', image: '/images/services/service-7.png' },
+    { id: 8, title: 'Email Personalization', description: 'We specialize in writing captivating opening lines for personalized emails.', image: '/images/services/service-8.png' },
+    { id: 9, title: 'Apollo Data Scrapping', description: 'Get hassle-free Apollo.io data export, reformatting, cleaning, and validation at an unbeatable price!', image: '/images/services/service-9.png' },
+    { id: 10, title: 'Done-For-You Cold Email Outreach', description: 'Effortlessly execute cold email outreach with our ‘Done-For-You’ service.', image: '/images/services/service-10.png' },
+    { id: 11, title: 'Done-For-You Linkedin Outreach', description: 'Transform your outreach with our ‘Done-For-You’ Linkedin outreach service.', image: '/images/services/service-11.png' },
 ];
 
 // --- Sub-Components (Defined outside App) ---
@@ -116,7 +116,7 @@ const Hero = () => {
                     </div>
                     <div>
                         <img
-                          src="https://i.imgur.com/8V1aA24.png"
+                          src="/images/hero-team.png"
                           alt="B2B Lead Generation Team Collaboration"
                           className={`rounded-lg shadow-2xl transition-transform duration-1000 ease-out ${inView ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`} />
                     </div>
@@ -147,9 +147,9 @@ const CelebrityClients = () => (
             <p className="text-gray-600 mb-12">You must be familiar with them, right? We're helping their businesses with our services.</p>
             <div className="grid md:grid-cols-3 gap-12">
                 {[
-                    {name: "Josh Braun", company: "SalesDNA", img: "https://i.imgur.com/r3y3b1W.jpg", text: "Nsleadprovider is very professional. Delivered contacts and email addresses in a timely manner - no hiccups along the way. I would recommend working with Nsleadprovider.", color: "purple-200"},
-                    {name: "Bruce Merrill", company: "Cleverly", img: "https://i.imgur.com/b9eY2bT.jpg", text: "Nsleadprovider did excellent. I am highly recommending them as good LeadGen team. I will hire them for my next project, definitely. Highly recommended to anyone.", color: "pink-200"},
-                    {name: "Justin Michael", company: "JMM", img: "https://i.imgur.com/3Z6h7d2.jpg", text: "Nsleadprovider did a fantastic job and I will use their services again in the future! I would definitely recommend giving them a try. Enthusiastic and quality job delivered on time.", color: "blue-200"}
+                    {name: "Josh Braun", company: "SalesDNA", img: "/images/clients/josh-braun.jpg", text: "Nsleadprovider is very professional. Delivered contacts and email addresses in a timely manner - no hiccups along the way. I would recommend working with Nsleadprovider.", color: "purple-200"},
+                    {name: "Bruce Merrill", company: "Cleverly", img: "/images/clients/bruce-merrill.jpg", text: "Nsleadprovider did excellent. I am highly recommending them as good LeadGen team. I will hire them for my next project, definitely. Highly recommended to anyone.", color: "pink-200"},
+                    {name: "Justin Michael", company: "JMM", img: "/images/clients/justin-michael.jpg", text: "Nsleadprovider did a fantastic job and I will use their services again in the future! I would definitely recommend giving them a try. Enthusiastic and quality job delivered on time.", color: "blue-200"}
                 ].map((client, i) => (
                     <div key={i} className={`bg-${client.color} p-8 rounded-3xl relative`}>
                         <div className="bg-white p-8 rounded-2xl shadow-lg relative -mt-16">
@@ -170,9 +170,9 @@ const WhoWeHelp = () => (
             <h2 className="text-3xl font-bold mb-12">Who We Help</h2>
             <div className="grid md:grid-cols-3 gap-8">
                  {[
-                    {title: "Who Run a Business", img: "https://i.imgur.com/C5m2Y0h.jpg"},
-                    {title: "Who Manage Sales", img: "https://i.imgur.com/M6L5kYQ.jpg"},
-                    {title: "Who Drive Marketing", img: "https://i.imgur.com/v1hQ3b5.jpg"}
+                    {title: "Who Run a Business", img: "/images/who-we-help/business.jpg"},
+                    {title: "Who Manage Sales", img: "/images/who-we-help/sales.jpg"},
+                    {title: "Who Drive Marketing", img: "/images/who-we-help/marketing.jpg"}
                 ].map((who, i) => (
                     <div key={i}>
                         <h3 className="text-xl font-semibold mb-4 text-gray-700">{who.title}</h3>
@@ -191,7 +191,7 @@ const TrustedClients = () => (
             <p className="text-gray-600 mb-8 max-w-3xl mx-auto">We deliver expert solutions tailored to your needs. Experience excellence and innovation with our dedicated team. Join our global network of satisfied partners</p>
             <div className="flex flex-wrap justify-center">
                  {Array.from({length: 12}).map((_, i) => (
-                     <img key={i} src={`https://i.imgur.com/p${i+1}.jpg`} alt={`Client ${i+1}`} className="w-20 h-20 rounded-full object-cover m-2 border-2 border-white shadow-md transition-transform hover:scale-110" />
+                     <img key={i} src={`/images/trusted-clients/client-${i+1}.jpg`} alt={`Client ${i+1}`} className="w-20 h-20 rounded-full object-cover m-2 border-2 border-white shadow-md transition-transform hover:scale-110" />
                  ))}
             </div>
         </div>
@@ -233,8 +233,8 @@ const OurWork = () => (
                 ))}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {['https://i.imgur.com/Wf5Z6v6.png', 'https://i.imgur.com/T0b4b8c.png', 'https://i.imgur.com/I7y3S4s.png', 'https://i.imgur.com/7b5f9E2.png', 'https://i.imgur.com/A6j5d8k.png', 'https://i.imgur.com/n9b8R4G.png'].map((img, i) => (
-                     <img key={i} src={img} alt={`Work sample ${i+1}`} className="rounded-lg shadow-lg w-full h-auto object-cover" />
+                 {Array.from({length: 6}).map((_, i) => (
+                     <img key={i} src={`/images/work/sample-${i+1}.png`} alt={`Work sample ${i+1}`} className="rounded-lg shadow-lg w-full h-auto object-cover" />
                  ))}
             </div>
         </div>
@@ -260,9 +260,9 @@ const HappyClients = () => (
             <p className="text-gray-600 mb-12">Our 98% of clients leave 5/5 star reviews with their high satisfaction. Other 2% made it at least 4 stars</p>
             <div className="grid md:grid-cols-3 gap-8">
                  {[
-                    {name: "Ryan Kelly", company: "Co-Founder & Partner - Lendzi", img: "https://i.imgur.com/6cZ8Y4E.jpg", text: "What a pleasure it is to work with Nsleadprovider - We gave a complicated email list collection task and he over delivered as usual great quality! Great work done! Highly recommended!", color: "pink-300"},
-                    {name: "Matthew Quinn", company: "VP of Sales at WorkEQ", img: "https://i.imgur.com/9n9O8u5.jpg", text: "Really excellent work, and will definitely rehire for future work. Nsleadprovider now the company where I contact first if I have something that needs to be done well. Great job!", color: "green-300"},
-                    {name: "John Barrows", company: "Founder & CEO at JB Sales", img: "https://i.imgur.com/z4D1S5Q.jpg", text: "Nsleadprovider is the best when it comes to email scraping and data mining! They provides the best quality of work in short time. I say go with them! You will not regret it!", color: "purple-400"}
+                    {name: "Ryan Kelly", company: "Co-Founder & Partner - Lendzi", img: "/images/happy-clients/ryan-kelly.jpg", text: "What a pleasure it is to work with Nsleadprovider - We gave a complicated email list collection task and he over delivered as usual great quality! Great work done! Highly recommended!", color: "pink-300"},
+                    {name: "Matthew Quinn", company: "VP of Sales at WorkEQ", img: "/images/happy-clients/matthew-quinn.jpg", text: "Really excellent work, and will definitely rehire for future work. Nsleadprovider now the company where I contact first if I have something that needs to be done well. Great job!", color: "green-300"},
+                    {name: "John Barrows", company: "Founder & CEO at JB Sales", img: "/images/happy-clients/john-barrows.jpg", text: "Nsleadprovider is the best when it comes to email scraping and data mining! They provides the best quality of work in short time. I say go with them! You will not regret it!", color: "purple-400"}
                  ].map((client, i) => (
                     <div key={i} className={`bg-${client.color} p-6 rounded-3xl shadow-lg`}>
                         <div className="relative">
@@ -281,7 +281,7 @@ const HappyClients = () => (
 );
 
 const FreePilotCTA = () => (
-     <section className="py-12 bg-cover bg-center" style={{backgroundImage: "url('https://i.imgur.com/Wf5Z6v6.png')"}}>
+     <section className="py-12 bg-cover bg-center" style={{backgroundImage: "url('/images/work/sample-1.png')"}}>
         <div className="container mx-auto px-6 text-center bg-black bg-opacity-50 py-12 rounded-lg">
             <h2 className="text-4xl font-bold text-white mb-4">Connect Us For Free Pilot</h2>
             <button className="bg-yellow-400 text-gray-900 font-bold py-4 px-10 rounded-lg text-xl hover:bg-yellow-500 transition duration-300">TEST US FREE</button>
@@ -510,6 +510,8 @@ function App() {
     const handleRemoveFromCart = (id: number) => {
         setCart(cart.filter(item => item.id !== id));
     };
+
+
 
     const handleCheckout = () => {
         const newOrder: Order = {
