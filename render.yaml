@@ -1,5 +1,4 @@
 services:
-  # Frontend Static Site
   - type: static_site
     name: nsleadprovider-frontend
     rootDir: frontend
@@ -9,8 +8,6 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-
-  # Backend Web Service
   - type: web
     name: nsleadprovider-backend
     env: node
