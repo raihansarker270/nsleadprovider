@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import db from './db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+// Fix: Import `exit` from `process` to explicitly bring in Node.js types and resolve errors with `process.exit`.
+import { exit } from 'process';
 
 
 // Placeholder for future API route imports
@@ -24,7 +26,8 @@ const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 if (missingEnvVars.length > 0) {
     console.error(`FATAL ERROR: Missing required environment variables: ${missingEnvVars.join(', ')}`);
     console.error('Please set these variables in your deployment environment.');
-    process.exit(1); // Exit with a non-zero code to indicate failure
+    // Fix: Use the imported `exit` function to avoid a TypeScript type error where `process.exit` was not defined.
+    exit(1); // Exit with a non-zero code to indicate failure
 }
 
 
@@ -137,7 +140,8 @@ async function initializeDatabase() {
     console.log("Database initialized: 'users' table is ready.");
   } catch (error) {
     console.error("FATAL ERROR: Could not initialize database:", error);
-    process.exit(1);
+    // Fix: Use the imported `exit` function to avoid a TypeScript type error where `process.exit` was not defined.
+    exit(1);
   }
 }
 

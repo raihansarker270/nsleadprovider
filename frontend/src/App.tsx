@@ -61,14 +61,34 @@ const services: Service[] = [
 ];
 
 // --- Sub-Components (Defined outside App) ---
+interface HeaderProps {
+    onGetStarted: () => void;
+    isLoggedIn: boolean;
+    onLogout: () => void;
+    onCartClick: () => void;
+    cartItemCount: number;
+    onNavigateHome: () => void;
+    onNavigateDashboard: () => void;
+    view: 'home' | 'dashboard';
+}
 
-const Header = ({ onGetStarted, isLoggedIn, onLogout, onCartClick, cartItemCount }: { onGetStarted: () => void, isLoggedIn: boolean, onLogout: () => void, onCartClick: () => void, cartItemCount: number }) => (
+
+const Header = ({ onGetStarted, isLoggedIn, onLogout, onCartClick, cartItemCount, onNavigateHome, onNavigateDashboard, view }: HeaderProps) => (
     <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div className="text-2xl font-bold text-indigo-700">
-                <span className="text-yellow-500">⭐</span> Nsleadprovider
-            </div>
+            <button onClick={onNavigateHome} className="text-2xl font-bold text-indigo-700 flex items-center focus:outline-none" aria-label="Nsleadprovider, go to home page">
+                <span className="text-yellow-500 mr-2">⭐</span> Nsleadprovider
+            </button>
             <nav className="hidden md:flex space-x-8 items-center">
+                {isLoggedIn && (
+                     <button 
+                        onClick={onNavigateDashboard} 
+                        className={`font-semibold transition-colors duration-200 ${view === 'dashboard' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-600'}`}
+                        aria-current={view === 'dashboard' ? 'page' : undefined}
+                    >
+                        Dashboard
+                    </button>
+                )}
                 <a href="#clients" className="text-gray-600 hover:text-indigo-600">Our Clients</a>
                 <a href="#" className="text-gray-600 hover:text-indigo-600">Process</a>
                 <a href="#work" className="text-gray-600 hover:text-indigo-600">Our Work</a>
@@ -79,7 +99,7 @@ const Header = ({ onGetStarted, isLoggedIn, onLogout, onCartClick, cartItemCount
             <div>
                 {isLoggedIn ? (
                     <div className="flex items-center gap-4">
-                        <button onClick={onCartClick} className="text-white focus:outline-none p-2 rounded-full bg-indigo-600 hover:bg-indigo-700">
+                        <button onClick={onCartClick} className="text-white focus:outline-none p-2 rounded-full bg-indigo-600 hover:bg-indigo-700" aria-label={`View cart with ${cartItemCount} items`}>
                             <CartIcon itemCount={cartItemCount} />
                         </button>
                         <button onClick={onLogout} className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300">
@@ -252,7 +272,7 @@ const About = () => (
             <h2 className="text-3xl font-bold mb-4">About The Nsleadprovider</h2>
             <p className="text-gray-600 max-w-4xl mx-auto mb-12">Nsleadprovider – A powerhouse of 85+ data researchers & outbound experts across Bangladesh, India, & the USA. We build precision-targeted prospect databases and offer cold email & Linkedin outreach campaign management with guaranteed lead qualification & appointment setting.</p>
             <div className="aspect-w-16 aspect-h-9 max-w-4xl mx-auto rounded-lg shadow-2xl overflow-hidden">
-                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen title="Nsleadprovider Introduction Video"></iframe>
             </div>
         </div>
     </section>
@@ -351,7 +371,7 @@ const AuthModal = ({ onClose, onAuthSuccess }: { onClose: () => void, onAuthSucc
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md relative">
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl" aria-label="Close authentication modal">&times;</button>
                 <h2 className="text-2xl font-bold text-center mb-6">{isRegister ? 'Create Account' : 'Welcome Back!'}</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
@@ -445,7 +465,7 @@ const CartModal = ({ isOpen, onClose, cart, onRemoveFromCart, onCheckout }: { is
             <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-2xl">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">Your Cart ({totalItems})</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl" aria-label="Close cart modal">&times;</button>
                 </div>
                 {cart.length === 0 ? (
                     <p>Your cart is empty.</p>
@@ -508,6 +528,7 @@ function App() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [view, setView] = useState<'home' | 'dashboard'>('home');
 
     // Check session on initial load
     useEffect(() => {
@@ -522,7 +543,9 @@ function App() {
                      const data = await response.json();
                      if (data.loggedIn) {
                         setLoggedIn(true);
-                        // In a real app, fetch cart and orders here
+                        // If logged in, default to dashboard view. 
+                        // If you want them to land on the homepage, change this to 'home'
+                        setView('dashboard'); 
                      } else {
                         localStorage.removeItem('token');
                      }
@@ -553,6 +576,7 @@ function App() {
             if (response.ok) {
                 localStorage.setItem('token', data.token);
                 setLoggedIn(true);
+                setView('dashboard');
                 setAuthModalOpen(false);
                  // In a real app, fetch cart and orders here
             } else {
@@ -567,6 +591,7 @@ function App() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         setLoggedIn(false);
+        setView('home');
         setCart([]); 
         setOrders([]); 
     };
@@ -605,10 +630,13 @@ function App() {
                 onLogout={handleLogout}
                 onCartClick={() => setCartModalOpen(true)}
                 cartItemCount={cart.length}
+                onNavigateHome={() => setView('home')}
+                onNavigateDashboard={() => setView('dashboard')}
+                view={view}
              />
-             {error && <div className="bg-red-500 text-white p-4 text-center">{error}</div>}
+             {error && <div className="bg-red-500 text-white p-4 text-center" role="alert">{error}</div>}
             <main>
-                {isLoggedIn ? (
+                {isLoggedIn && view === 'dashboard' ? (
                     <>
                         <Dashboard onAddToCart={handleAddToCart} cart={cart}/>
                         <OrderHistory orders={orders} />
@@ -629,7 +657,7 @@ function App() {
                    </>
                 )}
             </main>
-            {!isLoggedIn && <Footer />}
+            {(!isLoggedIn || view === 'home') && <Footer />}
 
             {isAuthModalOpen && <AuthModal onClose={handleCloseAuthModal} onAuthSuccess={handleAuthSuccess} />}
             <CartModal
