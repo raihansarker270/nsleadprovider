@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 // --- Type Definitions ---
@@ -12,8 +12,8 @@ interface Service {
 interface CartItem extends Service {}
 
 interface Order {
-  id: string;
-  date: string;
+  id: number;
+  order_date: string;
   items: CartItem[];
 }
 
@@ -332,7 +332,7 @@ const Footer = () => (
     </footer>
 );
 
-const AuthModal = ({ onClose, onAuthSuccess }: { onClose: () => void, onAuthSuccess: (email: string, pass: string, isRegister: boolean) => void }) => {
+const AuthModal = ({ onClose, onAuthSuccess, error }: { onClose: () => void, onAuthSuccess: (email: string, pass: string, isRegister: boolean) => void, error: string | null }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isRegister, setIsRegister] = useState(false);
@@ -347,6 +347,7 @@ const AuthModal = ({ onClose, onAuthSuccess }: { onClose: () => void, onAuthSucc
             <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md relative">
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
                 <h2 className="text-2xl font-bold text-center mb-6">{isRegister ? 'Create Account' : 'Welcome Back!'}</h2>
+                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-gray-700 mb-2" htmlFor="email">Email Address</label>
@@ -410,8 +411,8 @@ const OrderHistory = ({ orders }: { orders: Order[] }) => (
                 {orders.map(order => (
                     <div key={order.id} className="bg-white p-6 rounded-lg shadow-md">
                         <div className="flex justify-between items-center mb-4">
-                           <h3 className="text-xl font-semibold text-indigo-700">Order #{order.id.substring(0, 8)}</h3>
-                           <p className="text-gray-500">{order.date}</p>
+                           <h3 className="text-xl font-semibold text-indigo-700">Order #{order.id}</h3>
+                           <p className="text-gray-500">{new Date(order.order_date).toLocaleDateString()}</p>
                         </div>
                         <ul className="space-y-2">
                            {order.items.map(item => (
@@ -486,7 +487,7 @@ const CheckoutSuccessModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: (
 }
 
 const LoadingSpinner = () => (
-    <div className="flex justify-center items-center h-screen">
+    <div className="fixed inset-0 bg-white bg-opacity-75 flex justify-center items-center z-50">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-600"></div>
     </div>
 );
@@ -501,58 +502,85 @@ function App() {
     const [isCheckoutSuccessOpen, setCheckoutSuccessOpen] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
 
-    // Check session on initial load
-    useEffect(() => {
-        const checkSession = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (token) {
-                     // In a real app, you would verify the token with the backend
-                     const response = await fetch('/api/session', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                     });
-                     const data = await response.json();
-                     if (data.loggedIn) {
-                        setLoggedIn(true);
-                        // In a real app, fetch cart and orders here
-                     } else {
-                        localStorage.removeItem('token');
-                     }
-                }
-            } catch (err) {
-                 console.error("Session check failed:", err);
-            } finally {
-                setIsLoading(false);
+    const apiRequest = async (endpoint: string, method: string, body?: any) => {
+        setIsProcessing(true);
+        try {
+            const token = localStorage.getItem('token');
+            const headers: HeadersInit = { 'Content-Type': 'application/json' };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
-        };
-        checkSession();
+            const response = await fetch(`/api${endpoint}`, {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : undefined,
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || `${method} request to ${endpoint} failed`);
+            }
+            return data;
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+    
+    const fetchUserData = useCallback(async () => {
+        try {
+            const [cartData, ordersData] = await Promise.all([
+                apiRequest('/cart', 'GET'),
+                apiRequest('/orders', 'GET')
+            ]);
+            setCart(cartData);
+            setOrders(ordersData);
+        } catch (error: any) {
+            console.error("Failed to fetch user data:", error.message);
+            // Handle token expiration by logging out
+            if (error.message.includes('401') || error.message.includes('403')) {
+                handleLogout();
+            }
+        }
     }, []);
 
+    useEffect(() => {
+        const checkSession = async () => {
+            setIsLoading(true);
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    await apiRequest('/session', 'GET');
+                    setLoggedIn(true);
+                    await fetchUserData();
+                } catch (e) {
+                    localStorage.removeItem('token');
+                    setLoggedIn(false);
+                }
+            }
+            setIsLoading(false);
+        };
+        checkSession();
+    }, [fetchUserData]);
 
-    const handleGetStarted = () => setAuthModalOpen(true);
+
+    const handleGetStarted = () => {
+      setAuthError(null);
+      setAuthModalOpen(true);
+    };
     const handleCloseAuthModal = () => setAuthModalOpen(false);
     
     const handleAuthSuccess = async (email: string, password: string, isRegister: boolean) => {
-        const endpoint = isRegister ? '/api/register' : '/api/login';
+        const endpoint = isRegister ? '/register' : '/login';
         try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                localStorage.setItem('token', data.token);
-                setLoggedIn(true);
-                setAuthModalOpen(false);
-                 // In a real app, fetch cart and orders here
-            } else {
-                throw new Error(data.message || 'Authentication failed');
-            }
+            const data = await apiRequest(endpoint, 'POST', { email, password });
+            localStorage.setItem('token', data.token);
+            setLoggedIn(true);
+            setAuthModalOpen(false);
+            await fetchUserData();
         } catch (err: any) {
-            setError(err.message);
+            setAuthError(err.message);
             console.error(err);
         }
     };
@@ -564,26 +592,36 @@ function App() {
         setOrders([]); 
     };
 
-    // --- Mock API calls for cart and orders since backend is simplified ---
-    const handleAddToCart = (service: Service) => {
-        if (!cart.some(item => item.id === service.id)) {
-            setCart([...cart, service]);
+    const handleAddToCart = async (service: Service) => {
+        try {
+            if (!cart.some(item => item.id === service.id)) {
+                const updatedCart = await apiRequest('/cart', 'POST', { serviceId: service.id });
+                setCart(updatedCart);
+            }
+        } catch (error) {
+            console.error("Failed to add to cart:", error);
         }
     };
-    const handleRemoveFromCart = (id: number) => {
-        setCart(cart.filter(item => item.id !== id));
+    
+    const handleRemoveFromCart = async (id: number) => {
+        try {
+             const updatedCart = await apiRequest(`/cart/${id}`, 'DELETE');
+             setCart(updatedCart);
+        } catch (error) {
+            console.error("Failed to remove from cart:", error);
+        }
     };
 
-    const handleCheckout = () => {
-        const newOrder: Order = {
-            id: new Date().toISOString(),
-            date: new Date().toLocaleDateString(),
-            items: [...cart],
-        };
-        setOrders([...orders, newOrder]);
-        setCart([]);
-        setCartModalOpen(false);
-        setCheckoutSuccessOpen(true);
+    const handleCheckout = async () => {
+        try {
+            await apiRequest('/orders', 'POST', {});
+            setCart([]);
+            setCartModalOpen(false);
+            setCheckoutSuccessOpen(true);
+            await fetchUserData(); // Refresh orders
+        } catch(error) {
+            console.error("Checkout failed:", error);
+        }
     }
 
     if (isLoading) {
@@ -592,6 +630,7 @@ function App() {
 
     return (
         <div className="bg-white">
+            {isProcessing && <LoadingSpinner />}
             <Header
                 onGetStarted={handleGetStarted}
                 isLoggedIn={isLoggedIn}
@@ -599,7 +638,6 @@ function App() {
                 onCartClick={() => setCartModalOpen(true)}
                 cartItemCount={cart.length}
              />
-             {error && <div className="bg-red-500 text-white p-4 text-center">{error}</div>}
             <main>
                 {isLoggedIn ? (
                     <>
@@ -624,7 +662,7 @@ function App() {
             </main>
             {!isLoggedIn && <Footer />}
 
-            {isAuthModalOpen && <AuthModal onClose={handleCloseAuthModal} onAuthSuccess={handleAuthSuccess} />}
+            {isAuthModalOpen && <AuthModal onClose={handleCloseAuthModal} onAuthSuccess={handleAuthSuccess} error={authError} />}
             <CartModal
                 isOpen={isCartModalOpen}
                 onClose={() => setCartModalOpen(false)}
