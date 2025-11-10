@@ -1,6 +1,4 @@
-// Fix: Replaced placeholder content with a valid server implementation.
-// Fix: Add explicit types for Express Request and Response to resolve type inference issues.
-// Fix: Import Express type and apply it to the app instance.
+// Fix: Switch to default import for express to resolve type conflicts.
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -41,7 +39,7 @@ app.use(express.json());
 
 // --- API ROUTES ---
 
-// Fix: Use express.Request and express.Response for proper type inference.
+// Fix: Use express.Request and express.Response types from express namespace.
 app.post('/api/register', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -71,7 +69,7 @@ app.post('/api/register', async (req: express.Request, res: express.Response) =>
 });
 
 
-// Fix: Use express.Request and express.Response for proper type inference.
+// Fix: Use express.Request and express.Response types from express namespace.
 app.post('/api/login', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
      if (!email || !password) {
@@ -101,7 +99,7 @@ app.post('/api/login', async (req: express.Request, res: express.Response) => {
 });
 
 // A protected route to check session
-// Fix: Use express.Request and express.Response for proper type inference.
+// Fix: Use express.Request and express.Response types from express namespace.
 app.get('/api/session', (req: express.Request, res: express.Response) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -118,7 +116,7 @@ app.get('/api/session', (req: express.Request, res: express.Response) => {
 });
 
 // Health check route for Render
-// Fix: Use express.Request and express.Response for proper type inference.
+// Fix: Use express.Request and express.Response types from express namespace.
 app.get('/api/health', (req: express.Request, res: express.Response) => {
     res.status(200).json({ status: 'ok' });
 });

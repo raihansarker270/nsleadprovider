@@ -1,4 +1,5 @@
-// Fix: Add explicit types for Express Request and Response to resolve type inference issues.
+
+// Fix: Switch to default import for express to resolve type conflicts.
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -34,6 +35,7 @@ app.use(express.static(path.join(__dirname, '..', 'dist')));
 // Mock user store
 const users: any[] = []; 
 
+// Fix: Use express.Request and express.Response types from express namespace.
 app.post('/api/register', async (req: express.Request, res: express.Response) => {
     // In a real app, you'd hash the password with bcrypt
     const { email, password } = req.body;
@@ -47,6 +49,7 @@ app.post('/api/register', async (req: express.Request, res: express.Response) =>
 });
 
 
+// Fix: Use express.Request and express.Response types from express namespace.
 app.post('/api/login', async (req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
     const user = users.find(u => u.email === email && u.password === password);
@@ -57,6 +60,7 @@ app.post('/api/login', async (req: express.Request, res: express.Response) => {
 });
 
 // A protected route to check session
+// Fix: Use express.Request and express.Response types from express namespace.
 app.get('/api/session', (req: express.Request, res: express.Response) => {
     // In a real app, you'd verify a JWT from the Authorization header
     const token = req.headers.authorization?.split(' ')[1];
@@ -70,6 +74,7 @@ app.get('/api/session', (req: express.Request, res: express.Response) => {
 
 // The "catchall" handler: for any request that doesn't match one above,
 // send back React's index.html file.
+// Fix: Use express.Request and express.Response types from express namespace.
 app.get('*', (req: express.Request, res: express.Response) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });

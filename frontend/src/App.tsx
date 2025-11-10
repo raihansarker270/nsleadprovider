@@ -1,5 +1,5 @@
 // Fix: Add Vite client types to resolve issues with import.meta.env.
-/// <reference types="vite/client" />
+// The /// <reference> directive was removed as it was causing a type definition resolution error.
 import React, { useState, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 
@@ -20,7 +20,8 @@ interface Order {
 }
 
 // Base URL for the API, configured via environment variables for deployment flexibility.
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// Fix: Cast to 'unknown' before asserting type for import.meta.env to satisfy TypeScript.
+const API_BASE_URL = (import.meta as unknown as { env: { VITE_API_URL?: string } }).env.VITE_API_URL || '';
 
 
 // --- SVG Icon Components ---
