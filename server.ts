@@ -1,7 +1,9 @@
 
 
+
 // Fix: Use a default import for express to resolve type conflicts.
-import express from 'express';
+// Fix: Import Request and Response types directly from express to resolve type errors.
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -37,7 +39,7 @@ app.use(express.static(path.join(__dirname, '..', 'dist')));
 const users: any[] = []; 
 
 // Fix: Use Request and Response types from express.
-app.post('/api/register', async (req: express.Request, res: express.Response) => {
+app.post('/api/register', async (req: Request, res: Response) => {
     // In a real app, you'd hash the password with bcrypt
     const { email, password } = req.body;
     if (users.find(u => u.email === email)) {
@@ -51,7 +53,7 @@ app.post('/api/register', async (req: express.Request, res: express.Response) =>
 
 
 // Fix: Use Request and Response types from express.
-app.post('/api/login', async (req: express.Request, res: express.Response) => {
+app.post('/api/login', async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const user = users.find(u => u.email === email && u.password === password);
     if (!user) {
@@ -62,7 +64,7 @@ app.post('/api/login', async (req: express.Request, res: express.Response) => {
 
 // A protected route to check session
 // Fix: Use Request and Response types from express.
-app.get('/api/session', (req: express.Request, res: express.Response) => {
+app.get('/api/session', (req: Request, res: Response) => {
     // In a real app, you'd verify a JWT from the Authorization header
     const token = req.headers.authorization?.split(' ')[1];
     if (token === 'fake-jwt-token') {
@@ -76,7 +78,7 @@ app.get('/api/session', (req: express.Request, res: express.Response) => {
 // The "catchall" handler: for any request that doesn't match one above,
 // send back React's index.html file.
 // Fix: Use Request and Response types from express.
-app.get('*', (req: express.Request, res: express.Response) => {
+app.get('*', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 

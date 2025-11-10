@@ -1,5 +1,6 @@
 // Fix: Use a default import for express to resolve type conflicts.
-import express from 'express';
+// Fix: Import Request and Response types directly from express to resolve type errors.
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import db from './db.js';
@@ -33,26 +34,13 @@ const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 
-/*
-IMPORTANT: Before running, ensure you have a 'users' table in your PostgreSQL database.
-You can create it with the following SQL command:
-
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-*/
-
 app.use(cors());
 app.use(express.json());
 
 // --- API ROUTES ---
 
 // Fix: Use Request and Response types from express.
-app.post('/api/register', async (req: express.Request, res: express.Response) => {
+app.post('/api/register', async (req: Request, res: Response) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
@@ -82,7 +70,7 @@ app.post('/api/register', async (req: express.Request, res: express.Response) =>
 
 
 // Fix: Use Request and Response types from express.
-app.post('/api/login', async (req: express.Request, res: express.Response) => {
+app.post('/api/login', async (req: Request, res: Response) => {
     const { email, password } = req.body;
      if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
@@ -112,7 +100,7 @@ app.post('/api/login', async (req: express.Request, res: express.Response) => {
 
 // A protected route to check session
 // Fix: Use Request and Response types from express.
-app.get('/api/session', (req: express.Request, res: express.Response) => {
+app.get('/api/session', (req: Request, res: Response) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
@@ -129,10 +117,35 @@ app.get('/api/session', (req: express.Request, res: express.Response) => {
 
 // Health check route for Render
 // Fix: Use Request and Response types from express.
-app.get('/api/health', (req: express.Request, res: express.Response) => {
+app.get('/api/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'ok' });
 });
 
-app.listen(PORT, () => {
+// --- Database and Server Initialization ---
+
+async function initializeDatabase() {
+  try {
+    const createTableQuery = `
+      CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          email VARCHAR(255) UNIQUE NOT NULL,
+          password_hash VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    await db.query(createTableQuery, []);
+    console.log("Database initialized: 'users' table is ready.");
+  } catch (error) {
+    console.error("FATAL ERROR: Could not initialize database:", error);
+    process.exit(1);
+  }
+}
+
+async function startServer() {
+  await initializeDatabase();
+  app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
-});
+  });
+}
+
+startServer();
