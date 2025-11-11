@@ -352,10 +352,10 @@ const Footer = () => (
                  <div>
                     <h4 className="font-bold text-lg mb-4">Contact Us</h4>
                     <ul className="space-y-2 text-indigo-200">
-                        <li>+1 561-228-4003</li>
-                        <li>+8807776111677</li>
+                        <li>+1 561-567-7603</li>
+                        <li>+8801642815195</li>
                         <li>info@nsleadprovider.com</li>
-                        <li>nazmul__it</li>
+                        <li>naim__it</li>
                     </ul>
                 </div>
             </div>
