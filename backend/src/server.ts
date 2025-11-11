@@ -280,19 +280,31 @@ app.get('/api/health', (req: Request, res: Response) => {
 
 async function initializeDatabase() {
   try {
-    // Note: To make a user an admin, you would run this SQL manually in your database:
-    // UPDATE users SET role = 'admin' WHERE email = 'your-admin-email@example.com';
+    // Create users table if it doesn't exist (might be an old schema without role)
     const createUsersTableQuery = `
       CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
           email VARCHAR(255) UNIQUE NOT NULL,
           password_hash VARCHAR(255) NOT NULL,
-          role VARCHAR(50) NOT NULL DEFAULT 'user',
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
     await db.query(createUsersTableQuery, []);
 
+    // Check if the 'role' column exists in the 'users' table.
+    const checkColumnResult = await db.query(
+        "SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='role'",
+        []
+    );
+
+    // If the column doesn't exist, add it. This is a non-destructive migration.
+    if (checkColumnResult.rows.length === 0) {
+        console.log("Database schema update: Adding 'role' column to 'users' table.");
+        await db.query("ALTER TABLE users ADD COLUMN role VARCHAR(50) NOT NULL DEFAULT 'user'", []);
+        console.log("'role' column added successfully.");
+    }
+
+    // Create orders table
     const createOrdersTableQuery = `
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
@@ -303,6 +315,7 @@ async function initializeDatabase() {
     `;
     await db.query(createOrdersTableQuery, []);
 
+    // Create order_items table
     const createOrderItemsTableQuery = `
       CREATE TABLE IF NOT EXISTS order_items (
         id SERIAL PRIMARY KEY,
