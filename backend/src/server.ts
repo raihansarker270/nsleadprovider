@@ -79,10 +79,12 @@ const verifyAdmin = (req: Request, res: Response, next: NextFunction) => {
 // --- AUTH API ROUTES ---
 
 app.post('/api/register', async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-    if (typeof email !== 'string' || typeof password !== 'string' || password.length < 1) {
-        return res.status(400).json({ message: 'A valid email and password are required' });
+    const { email: rawEmail, password } = req.body;
+    if (typeof rawEmail !== 'string' || typeof password !== 'string' || password.length < 6) {
+        return res.status(400).json({ message: 'A valid email and a password of at least 6 characters are required' });
     }
+    
+    const email = rawEmail.toLowerCase();
 
     try {
         const existingUser = await db.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -101,8 +103,12 @@ app.post('/api/register', async (req: Request, res: Response) => {
         const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
 
         res.status(201).json({ message: 'User registered successfully', token });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Registration error:', error);
+        // Check for unique constraint violation (PostgreSQL error code)
+        if (error.code === '23505') { 
+            return res.status(400).json({ message: 'User with this email already exists' });
+        }
         res.status(500).json({ message: 'Server error during registration' });
     }
 });
@@ -115,7 +121,7 @@ app.post('/api/login', async (req: Request, res: Response) => {
     }
 
     try {
-        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
         if (result.rows.length === 0) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
