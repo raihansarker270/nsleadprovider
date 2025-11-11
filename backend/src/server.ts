@@ -87,28 +87,30 @@ app.post('/api/register', async (req: Request, res: Response) => {
     const email = rawEmail.toLowerCase();
 
     try {
+        // Explicitly check if user already exists
         const existingUser = await db.query('SELECT * FROM users WHERE email = $1', [email]);
         if (existingUser.rows.length > 0) {
-            return res.status(400).json({ message: 'User with this email already exists' });
+            return res.status(409).json({ message: 'An account with this email already exists.' });
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
 
-        const newUser = await db.query(
+        const newUserResult = await db.query(
             'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, role',
             [email, passwordHash]
         );
         
-        const user = newUser.rows[0];
+        const user = newUserResult.rows[0];
+        if (!user) {
+            // This case should ideally not be reached if the insert is successful
+            return res.status(500).json({ message: 'Failed to create user account.' });
+        }
+
         const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
 
         res.status(201).json({ message: 'User registered successfully', token });
     } catch (error: any) {
         console.error('Registration error:', error);
-        // Check for unique constraint violation (PostgreSQL error code)
-        if (error.code === '23505') { 
-            return res.status(400).json({ message: 'User with this email already exists' });
-        }
         res.status(500).json({ message: 'Server error during registration' });
     }
 });
