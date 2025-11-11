@@ -1,6 +1,6 @@
 // Fix: Add Vite client types to resolve issues with import.meta.env.
 // The /// <reference> directive was removed as it was causing a type definition resolution error.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 // --- Type Definitions ---
@@ -13,16 +13,35 @@ interface Service {
 
 interface CartItem extends Service {}
 
-interface Order {
-  id: string;
-  date: string;
-  items: CartItem[];
+interface OrderItem {
+    id: number;
+    service_id: number;
+    service_title: string;
+    service_image: string;
 }
+
+interface Order {
+  id: number;
+  created_at: string;
+  status: 'pending' | 'approved' | 'rejected';
+  items: OrderItem[];
+  user_email?: string; // For admin view
+}
+
 
 // Base URL for the API, configured via environment variables for deployment flexibility.
 // Fix: Cast to 'unknown' before asserting type for import.meta.env to satisfy TypeScript.
 const API_BASE_URL = (import.meta as unknown as { env: { VITE_API_URL?: string } }).env.VITE_API_URL || '';
 
+
+// --- Helper Functions ---
+function parseJwt(token: string) {
+    try {
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+        return null;
+    }
+}
 
 // --- SVG Icon Components ---
 const StarIcon = () => (
@@ -65,11 +84,13 @@ interface HeaderProps {
     cartItemCount: number;
     onNavigateHome: () => void;
     onNavigateDashboard: () => void;
-    view: 'home' | 'dashboard';
+    onNavigateAdmin: () => void;
+    view: 'home' | 'dashboard' | 'admin';
+    userRole: 'user' | 'admin' | null;
 }
 
 
-const Header = ({ onGetStarted, isLoggedIn, onLogout, onCartClick, cartItemCount, onNavigateHome, onNavigateDashboard, view }: HeaderProps) => (
+const Header = ({ onGetStarted, isLoggedIn, onLogout, onCartClick, cartItemCount, onNavigateHome, onNavigateDashboard, onNavigateAdmin, view, userRole }: HeaderProps) => (
     <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
             <button onClick={onNavigateHome} className="text-2xl font-bold text-indigo-700 flex items-center focus:outline-none" aria-label="Nsleadprovider, go to home page">
@@ -77,6 +98,7 @@ const Header = ({ onGetStarted, isLoggedIn, onLogout, onCartClick, cartItemCount
             </button>
             <nav className="hidden md:flex space-x-8 items-center">
                 {isLoggedIn && (
+                    <>
                      <button 
                         onClick={onNavigateDashboard} 
                         className={`font-semibold transition-colors duration-200 ${view === 'dashboard' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-600'}`}
@@ -84,6 +106,16 @@ const Header = ({ onGetStarted, isLoggedIn, onLogout, onCartClick, cartItemCount
                     >
                         Dashboard
                     </button>
+                    {userRole === 'admin' && (
+                         <button 
+                            onClick={onNavigateAdmin} 
+                            className={`font-semibold transition-colors duration-200 ${view === 'admin' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-600'}`}
+                            aria-current={view === 'admin' ? 'page' : undefined}
+                        >
+                            Admin Panel
+                        </button>
+                    )}
+                    </>
                 )}
                 <a href="#clients" className="text-gray-600 hover:text-indigo-600">Our Clients</a>
                 <a href="#" className="text-gray-600 hover:text-indigo-600">Process</a>
@@ -221,23 +253,13 @@ const TrustedClients = () => (
 );
 
 const WhatWeOffer = () => {
-    const offerings = [
-        { id: 1, title: 'Data Appending Enrichment', description: 'You Have a Lead List need Enrich with data Or contact person Email. We can help you to Enrich your Data. If You have an Old lead list And need to Update data then we can replace it with Update data. We can also Provide Missing Data From Various Sources and Valid Sources. We charge per row only 15 cents.', image: '/images/services/service-1.png' },
-        { id: 2, title: 'Email Appending Enrichment', description: 'You Have a Lead List that needs Enrich with the Owner or Decision makers Name and Email. We Provide any Decision makers contact Details.', image: '/images/services/service-2.png' },
-        { id: 3, title: 'Prospect List Building', description: 'We Have Some Targeted Companies. We are looking for their Decision makers Contact Details. We are here to help you to reach your goal. I Can Provide Linkedin Lead Generation Data.', image: '/images/services/service-3.png' },
-        { id: 4, title: 'Any Industry Leads', description: 'Here we Ready to provide any industry data. You just tell us about your targeted Industry Locations and Title/Role. You will get 100% valid data. We provide 100% Data accuracy Guarantee with 99% Emails Delivery Guarantee.', image: '/images/services/service-4.png' },
-        { id: 5, title: 'Email Finding', description: 'Do You Have a List? And Looking For their Valid Emails. Here We can provide 99% Delivery able Emails. Just Share your list with us. We provide valid emails for only 15 cents.', image: '/images/services/service-5.png' },
-        { id: 6, title: 'Direct Number Finding', description: 'We are looking For Contact Person Direct Dials Number and cell phone number/Mobile Number. Here We provide any contact person direct dials number and cell phone number at only 15 cents.', image: '/images/services/service-6.png' },
-        { id: 7, title: 'Skip Tracing', description: 'You only have a Person name and their Mailing address or home address. You are looking for their Cell/Direct phone number and Email. We can provide those contact details.', image: '/images/services/service-7.png' }
-    ];
-
     return (
         <section className="py-20 bg-indigo-900">
             <div className="container mx-auto px-6">
                 <h2 className="text-3xl font-bold text-center text-white mb-2">What We Offer?</h2>
                 <div className="w-24 h-1 bg-yellow-400 mx-auto mb-12"></div>
                 <div className="space-y-8">
-                    {offerings.map(service => (
+                    {services.map(service => (
                          <div key={service.id} className="bg-white p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center gap-8">
                             <img src={service.image} alt={service.title} className="w-48 h-auto" />
                             <div className="flex-1">
@@ -496,6 +518,20 @@ const Dashboard = ({ onAddToCart, cart }: { onAddToCart: (service: Service) => v
         </div>
     );
 };
+
+const OrderStatusBadge = ({ status }: { status: Order['status'] }) => {
+    const statusStyles = {
+        pending: 'bg-yellow-100 text-yellow-800',
+        approved: 'bg-green-100 text-green-800',
+        rejected: 'bg-red-100 text-red-800',
+    };
+    return (
+        <span className={`px-3 py-1 text-sm font-semibold rounded-full capitalize ${statusStyles[status]}`}>
+            {status}
+        </span>
+    );
+};
+
 const OrderHistory = ({ orders }: { orders: Order[] }) => (
     <div className="container mx-auto px-6 py-12 mt-10 border-t-2 border-gray-200">
         <h2 className="text-3xl font-bold mb-8">My Order History</h2>
@@ -505,15 +541,18 @@ const OrderHistory = ({ orders }: { orders: Order[] }) => (
             <div className="space-y-6">
                 {orders.map(order => (
                     <div key={order.id} className="bg-white p-6 rounded-lg shadow-md">
-                        <div className="flex justify-between items-center mb-4">
-                           <h3 className="text-xl font-semibold text-indigo-700">Order #{order.id.substring(0, 8)}</h3>
-                           <p className="text-gray-500">{order.date}</p>
+                        <div className="flex justify-between items-center mb-4 pb-4 border-b">
+                           <h3 className="text-xl font-semibold text-indigo-700">Order #{String(order.id).padStart(5, '0')}</h3>
+                           <div className="flex items-center gap-4">
+                                <p className="text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
+                                <OrderStatusBadge status={order.status} />
+                           </div>
                         </div>
                         <ul className="space-y-2">
                            {order.items.map(item => (
                                <li key={item.id} className="flex items-center gap-4 p-2 bg-gray-50 rounded">
-                                   <img src={item.image} alt={item.title} className="w-12 h-12 object-contain" />
-                                   <span className="font-medium text-gray-800">{item.title}</span>
+                                   <img src={item.service_image} alt={item.service_title} className="w-12 h-12 object-contain" />
+                                   <span className="font-medium text-gray-800">{item.service_title}</span>
                                </li>
                            ))}
                         </ul>
@@ -587,18 +626,131 @@ const LoadingSpinner = () => (
     </div>
 );
 
+const AdminPanel = () => {
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchAllOrders = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/admin/orders`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch orders');
+            const data = await response.json();
+            setOrders(data);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchAllOrders();
+    }, [fetchAllOrders]);
+
+    const handleUpdateStatus = async (orderId: number, status: 'approved' | 'rejected') => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/admin/orders/${orderId}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ status }),
+            });
+            if (!response.ok) throw new Error('Failed to update status');
+            // Update local state to reflect change immediately
+            setOrders(prevOrders => prevOrders.map(order => 
+                order.id === orderId ? { ...order, status } : order
+            ));
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    if (isLoading) return <div className="container mx-auto px-6 py-12"><LoadingSpinner /></div>;
+    if (error) return <div className="container mx-auto px-6 py-12 text-red-500 bg-red-100 p-4 rounded-lg">{error}</div>;
+
+    return (
+        <div className="container mx-auto px-6 py-12">
+            <h1 className="text-4xl font-bold mb-8">Admin Panel - All Orders</h1>
+            {orders.length === 0 ? (
+                <p className="text-gray-600 bg-gray-100 p-6 rounded-lg">No orders have been placed yet.</p>
+            ) : (
+                <div className="space-y-6">
+                    {orders.map(order => (
+                        <div key={order.id} className="bg-white p-6 rounded-lg shadow-md">
+                            <div className="flex flex-wrap justify-between items-center mb-4 pb-4 border-b">
+                               <div>
+                                  <h3 className="text-xl font-semibold text-indigo-700">Order #{String(order.id).padStart(5, '0')}</h3>
+                                  <p className="text-sm text-gray-500">User: {order.user_email}</p>
+                               </div>
+                               <div className="flex items-center gap-4 mt-4 sm:mt-0">
+                                    <p className="text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
+                                    <OrderStatusBadge status={order.status} />
+                               </div>
+                            </div>
+                            <ul className="space-y-2 mb-6">
+                               {order.items.map(item => (
+                                   <li key={item.id} className="flex items-center gap-4 p-2 bg-gray-50 rounded">
+                                       <img src={item.service_image} alt={item.service_title} className="w-12 h-12 object-contain" />
+                                       <span className="font-medium text-gray-800">{item.service_title}</span>
+                                   </li>
+                               ))}
+                            </ul>
+                            {order.status === 'pending' && (
+                                <div className="flex justify-end gap-4">
+                                    <button onClick={() => handleUpdateStatus(order.id, 'approved')} className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300">
+                                        Approve
+                                    </button>
+                                     <button onClick={() => handleUpdateStatus(order.id, 'rejected')} className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300">
+                                        Reject
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 // --- Main App Component ---
 function App() {
     const [isAuthModalOpen, setAuthModalOpen] = useState(false);
     const [isLoggedIn, setLoggedIn] = useState(false);
+    const [userRole, setUserRole] = useState<'user' | 'admin' | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
     const [isCartModalOpen, setCartModalOpen] = useState(false);
     const [isCheckoutSuccessOpen, setCheckoutSuccessOpen] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [view, setView] = useState<'home' | 'dashboard'>('home');
+    const [view, setView] = useState<'home' | 'dashboard' | 'admin'>('home');
+
+    const fetchUserOrders = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const response = await fetch(`${API_BASE_URL}/api/orders`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Could not fetch orders');
+            const data = await response.json();
+            setOrders(data);
+        } catch (err) {
+            console.error("Failed to fetch user orders:", err);
+        }
+    }, []);
 
     // Check session on initial load
     useEffect(() => {
@@ -606,16 +758,16 @@ function App() {
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
-                     // In a real app, you would verify the token with the backend
                      const response = await fetch(`${API_BASE_URL}/api/session`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                      });
                      const data = await response.json();
                      if (data.loggedIn) {
+                        const userData = parseJwt(token);
                         setLoggedIn(true);
-                        // If logged in, default to dashboard view. 
-                        // If you want them to land on the homepage, change this to 'home'
-                        setView('dashboard'); 
+                        setUserRole(userData?.role || 'user');
+                        setView('dashboard');
+                        fetchUserOrders();
                      } else {
                         localStorage.removeItem('token');
                      }
@@ -627,7 +779,7 @@ function App() {
             }
         };
         checkSession();
-    }, []);
+    }, [fetchUserOrders]);
 
 
     const handleGetStarted = () => setAuthModalOpen(true);
@@ -636,7 +788,7 @@ function App() {
     const handleAuthSuccess = async (email: string, password: string, isRegister: boolean) => {
         const endpoint = isRegister ? `${API_BASE_URL}/api/register` : `${API_BASE_URL}/api/login`;
         try {
-            setError(null); // Clear previous errors on a new attempt
+            setError(null); 
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -645,10 +797,12 @@ function App() {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem('token', data.token);
+                const userData = parseJwt(data.token);
                 setLoggedIn(true);
+                setUserRole(userData?.role || 'user');
                 setView('dashboard');
+                fetchUserOrders();
                 setAuthModalOpen(false);
-                 // In a real app, fetch cart and orders here
             } else {
                 throw new Error(data.message || 'Authentication failed');
             }
@@ -661,12 +815,12 @@ function App() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         setLoggedIn(false);
+        setUserRole(null);
         setView('home');
         setCart([]); 
         setOrders([]); 
     };
 
-    // --- Mock API calls for cart and orders since backend is simplified ---
     const handleAddToCart = (service: Service) => {
         if (!cart.some(item => item.id === service.id)) {
             setCart([...cart, service]);
@@ -676,21 +830,93 @@ function App() {
         setCart(cart.filter(item => item.id !== id));
     };
 
-    const handleCheckout = () => {
-        const newOrder: Order = {
-            id: new Date().toISOString(),
-            date: new Date().toLocaleDateString(),
-            items: [...cart],
-        };
-        setOrders([...orders, newOrder]);
-        setCart([]);
-        setCartModalOpen(false);
-        setCheckoutSuccessOpen(true);
+    const handleCheckout = async () => {
+        try {
+            setError(null);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/orders`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ items: cart }),
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.message || 'Checkout failed');
+            }
+
+            setCart([]);
+            setCartModalOpen(false);
+            setCheckoutSuccessOpen(true);
+            fetchUserOrders(); // Refresh orders after checkout
+        } catch (err: any) {
+            setError(err.message);
+        }
     }
+    
+    const navigateTo = (newView: 'home' | 'dashboard' | 'admin') => {
+        // Prevent non-admins from accessing admin panel
+        if (newView === 'admin' && userRole !== 'admin') {
+            setView('dashboard');
+            return;
+        }
+        setView(newView);
+    };
+
 
     if (isLoading) {
         return <LoadingSpinner />;
     }
+
+    const renderContent = () => {
+        if (isLoggedIn) {
+            switch(view) {
+                case 'admin':
+                    return userRole === 'admin' ? <AdminPanel /> : <Dashboard onAddToCart={handleAddToCart} cart={cart}/>;
+                case 'dashboard':
+                    return <>
+                        <Dashboard onAddToCart={handleAddToCart} cart={cart}/>
+                        <OrderHistory orders={orders} />
+                    </>;
+                case 'home':
+                default:
+                    // Logged in but wants to see home page
+                    return (
+                        <>
+                           <Hero />
+                            <Stats />
+                            <CelebrityClients id="clients" />
+                            <WhoWeHelp />
+                            <TrustedClients />
+                            <WhatWeOffer />
+                            <WhyChooseUs />
+                            <OurWork id="work" />
+                            <About />
+                            <HappyClients id="reviews" />
+                            <FreePilotCTA />
+                        </>
+                    );
+            }
+        }
+        // Not logged in, always show home page
+        return (
+            <>
+                <Hero />
+                <Stats />
+                <CelebrityClients id="clients" />
+                <WhoWeHelp />
+                <TrustedClients />
+                <WhatWeOffer />
+                <WhyChooseUs />
+                <OurWork id="work" />
+                <About />
+                <HappyClients id="reviews" />
+                <FreePilotCTA />
+            </>
+        );
+    };
 
     return (
         <div className="bg-white">
@@ -700,33 +926,15 @@ function App() {
                 onLogout={handleLogout}
                 onCartClick={() => setCartModalOpen(true)}
                 cartItemCount={cart.length}
-                onNavigateHome={() => setView('home')}
-                onNavigateDashboard={() => setView('dashboard')}
+                onNavigateHome={() => navigateTo('home')}
+                onNavigateDashboard={() => navigateTo('dashboard')}
+                onNavigateAdmin={() => navigateTo('admin')}
                 view={view}
+                userRole={userRole}
              />
              {error && <div className="bg-red-500 text-white p-4 text-center" role="alert">{error}</div>}
             <main>
-                {isLoggedIn && view === 'dashboard' ? (
-                    <>
-                        <Dashboard onAddToCart={handleAddToCart} cart={cart}/>
-                        <OrderHistory orders={orders} />
-                    </>
-
-                ) : (
-                   <>
-                        <Hero />
-                        <Stats />
-                        <CelebrityClients id="clients" />
-                        <WhoWeHelp />
-                        <TrustedClients />
-                        <WhatWeOffer />
-                        <WhyChooseUs />
-                        <OurWork id="work" />
-                        <About />
-                        <HappyClients id="reviews" />
-                        <FreePilotCTA />
-                   </>
-                )}
+                {renderContent()}
             </main>
             {(!isLoggedIn || view === 'home') && <Footer />}
 
