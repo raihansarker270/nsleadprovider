@@ -255,6 +255,68 @@ const WhatWeOffer = () => {
     );
 };
 
+// --- Why Choose Us Section Icons ---
+const CheckBadgeIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+    </svg>
+);
+
+const UserGroupIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+);
+
+const LightBulbIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+    </svg>
+);
+
+const SparklesIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.293 2.293a1 1 0 010 1.414L10 16l-4 4-4-4 5.293-5.293a1 1 0 011.414 0L10 13.586l1.293-1.293a1 1 0 011.414 0L15 15.01l2.293-2.293a1 1 0 011.414 0L21 15.01M12 3v4m-2-2h4" />
+    </svg>
+);
+
+const WrenchScrewdriverIcon = () => (
+     <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+);
+
+const WhyChooseUs = () => {
+    const points = [
+        { icon: <SparklesIcon />, text: "OUR COMMITMENT LESS THAN 1% EMAIL BOUNCE RATE" },
+        { icon: <CheckBadgeIcon />, text: "100% DATA ACCURACY GUARANTEE" },
+        { icon: <LightBulbIcon />, text: "WE PROVIDE LATEST B2B LEADS" },
+        { icon: <WrenchScrewdriverIcon />, text: "WE USE UPDATED TOOLS TO COLLECT AND VERIFY DATA" },
+        { icon: <UserGroupIcon />, text: "500+ CUSTOMERS BELIEVE US" },
+    ];
+
+    return (
+        <section className="py-20 bg-gray-50">
+            <div className="container mx-auto px-6 text-center">
+                <h2 className="text-3xl font-bold mb-4 text-gray-800">WHY CHOOSE US</h2>
+                <div className="w-24 h-1 bg-indigo-600 mx-auto mb-12"></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+                    {points.map((point, index) => (
+                        <div key={index} className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out">
+                            <div className="text-indigo-500 mb-4">
+                                {point.icon}
+                            </div>
+                            <p className="text-md font-semibold text-gray-700 uppercase tracking-wide">{point.text}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+
 const OurWork = ({ id }: { id?: string }) => (
     <section id={id} className="py-20 bg-white">
         <div className="container mx-auto px-6 text-center">
@@ -658,6 +720,7 @@ function App() {
                         <WhoWeHelp />
                         <TrustedClients />
                         <WhatWeOffer />
+                        <WhyChooseUs />
                         <OurWork id="work" />
                         <About />
                         <HappyClients id="reviews" />
