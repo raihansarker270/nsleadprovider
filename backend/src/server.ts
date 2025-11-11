@@ -31,34 +31,41 @@ app.use(cors());
 app.use(express.json());
 
 
-// --- TypeScript Type Extension for Express Request ---
+// --- TypeScript Type Augmentation for Express Request ---
 // This allows us to attach the decoded user payload to the request object
-// Fix: Changed from interface extension to a type intersection for better compatibility with the Express Request type, resolving errors where properties like `headers`, `body`, and `params` were not found.
-type AuthRequest = Request & {
-  user?: {
+// by augmenting the global Express Request type.
+
+interface UserPayload {
     userId: number;
     email: string;
     role: string;
-  };
-};
+}
+
+declare global {
+    namespace Express {
+        export interface Request {
+            user?: UserPayload;
+        }
+    }
+}
 
 
 // --- AUTHENTICATION MIDDLEWARE ---
-const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
         return res.status(403).json({ message: 'A token is required for authentication' });
     }
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded as AuthRequest['user'];
+        req.user = decoded as UserPayload;
     } catch (err) {
         return res.status(401).json({ message: 'Invalid Token' });
     }
     return next();
 };
 
-const verifyAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+const verifyAdmin = (req: Request, res: Response, next: NextFunction) => {
     verifyToken(req, res, () => {
         if (req.user?.role === 'admin') {
             next();
@@ -73,8 +80,8 @@ const verifyAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
 
 app.post('/api/register', async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required' });
+    if (typeof email !== 'string' || typeof password !== 'string' || password.length < 1) {
+        return res.status(400).json({ message: 'A valid email and password are required' });
     }
 
     try {
@@ -143,7 +150,7 @@ app.get('/api/session', (req: Request, res: Response) => {
 
 // --- USER ORDER ROUTES ---
 
-app.post('/api/orders', verifyToken, async (req: AuthRequest, res: Response) => {
+app.post('/api/orders', verifyToken, async (req: Request, res: Response) => {
     const userId = req.user?.userId;
     const { items } = req.body;
 
@@ -161,7 +168,7 @@ app.post('/api/orders', verifyToken, async (req: AuthRequest, res: Response) => 
         );
         const orderId = orderResult.rows[0].id;
 
-        const itemInsertPromises = items.map(item => {
+        const itemInsertPromises = items.map((item: {id: number; title: string; image: string; }) => {
             const { id, title, image } = item;
             return client.query(
                 'INSERT INTO order_items (order_id, service_id, service_title, service_image) VALUES ($1, $2, $3, $4)',
@@ -182,7 +189,7 @@ app.post('/api/orders', verifyToken, async (req: AuthRequest, res: Response) => 
     }
 });
 
-app.get('/api/orders', verifyToken, async (req: AuthRequest, res: Response) => {
+app.get('/api/orders', verifyToken, async (req: Request, res: Response) => {
     const userId = req.user?.userId;
     try {
         const ordersResult = await db.query(
@@ -206,7 +213,7 @@ app.get('/api/orders', verifyToken, async (req: AuthRequest, res: Response) => {
 
 // --- ADMIN ROUTES ---
 
-app.get('/api/admin/orders', verifyAdmin, async (req: AuthRequest, res: Response) => {
+app.get('/api/admin/orders', verifyAdmin, async (req: Request, res: Response) => {
     try {
         // Fix: Added an empty array as the second argument to match the 'query' function signature which expects a 'params' array.
         const ordersResult = await db.query(`
@@ -229,7 +236,7 @@ app.get('/api/admin/orders', verifyAdmin, async (req: AuthRequest, res: Response
     }
 });
 
-app.put('/api/admin/orders/:orderId', verifyAdmin, async (req: AuthRequest, res: Response) => {
+app.put('/api/admin/orders/:orderId', verifyAdmin, async (req: Request, res: Response) => {
     const { orderId } = req.params;
     const { status } = req.body;
 
