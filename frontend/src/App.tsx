@@ -47,17 +47,13 @@ const CartIcon = ({ itemCount }: { itemCount: number }) => (
 
 // --- Data ---
 const services: Service[] = [
-    { id: 1, title: 'Targeted Custom Contact List Building', description: 'Transform your outreach with our expertly curated, high-quality prospect contact lists.', image: '/images/services/service-1.png' },
-    { id: 2, title: 'Data Entry & Web Research', description: 'Our Data Entry & Web Research service offers precise data finding & input.', image: '/images/services/service-2.png' },
-    { id: 3, title: 'CRM Data Appending & Enrichment', description: 'Supercharge your CRM with our specialized email and phone number enrichment services.', image: '/images/services/service-3.png' },
-    { id: 4, title: 'Verified Email Finding', description: 'Unlock verified email discovery with our specialized service.', image: '/images/services/service-4.png' },
-    { id: 5, title: 'Phone Number Finding', description: 'Discover verified phone numbers with our dedicated service.', image: '/images/services/service-5.png' },
-    { id: 6, title: 'Hire Dedicated Research Team', description: 'Expand your reach with our dedicated research team focused on prospect contact data.', image: '/images/services/service-6.png' },
-    { id: 7, title: 'God Level Email Validation', description: 'Ensure flawless email validation with our ‘God Level’ service by sending test email 1 by 1 from public server.', image: '/images/services/service-7.png' },
-    { id: 8, title: 'Email Personalization', description: 'We specialize in writing captivating opening lines for personalized emails.', image: '/images/services/service-8.png' },
-    { id: 9, title: 'Apollo Data Scrapping', description: 'Get hassle-free Apollo.io data export, reformatting, cleaning, and validation at an unbeatable price!', image: '/images/services/service-9.png' },
-    { id: 10, title: 'Done-For-You Cold Email Outreach', description: 'Effortlessly execute cold email outreach with our ‘Done-For-You’ service.', image: '/images/services/service-10.png' },
-    { id: 11, title: 'Done-For-You Linkedin Outreach', description: 'Transform your outreach with our ‘Done-For-You’ Linkedin outreach service.', image: '/images/services/service-11.png' },
+    { id: 1, title: 'Data Appending Enrichment', description: 'You Have a Lead List need Enrich with data Or contact person Email. We can help you to Enrich your Data. If You have an Old lead list And need to Update data then we can replace it with Update data. We can also Provide Missing Data From Various Sources and Valid Sources. We charge per row only 15 cents.', image: '/images/services/service-1.png' },
+    { id: 2, title: 'Email Appending Enrichment', description: 'You Have a Lead List that needs Enrich with the Owner or Decision makers Name and Email. We Provide any Decision makers contact Details.', image: '/images/services/service-2.png' },
+    { id: 3, title: 'Prospect List Building', description: 'We Have Some Targeted Companies. We are looking for their Decision makers Contact Details. We are here to help you to reach your goal. I Can Provide Linkedin Lead Generation Data.', image: '/images/services/service-3.png' },
+    { id: 4, title: 'Any Industry Leads', description: 'Here we Ready to provide any industry data. You just tell us about your targeted Industry Locations and Title/Role. You will get 100% valid data. We provide 100% Data accuracy Guarantee with 99% Emails Delivery Guarantee.', image: '/images/services/service-4.png' },
+    { id: 5, title: 'Email Finding', description: 'Do You Have a List? And Looking For their Valid Emails. Here We can provide 99% Delivery able Emails. Just Share your list with us. We provide valid emails for only 15 cents.', image: '/images/services/service-5.png' },
+    { id: 6, title: 'Direct Number Finding', description: 'We are looking For Contact Person Direct Dials Number and cell phone number/Mobile Number. Here We provide any contact person direct dials number and cell phone number at only 15 cents.', image: '/images/services/service-6.png' },
+    { id: 7, title: 'Skip Tracing', description: 'You only have a Person name and their Mailing address or home address. You are looking for their Cell/Direct phone number and Email. We can provide those contact details.', image: '/images/services/service-7.png' }
 ];
 
 // --- Sub-Components (Defined outside App) ---
@@ -224,28 +220,40 @@ const TrustedClients = () => (
     </section>
 );
 
-const WhatWeOffer = () => (
-    <section className="py-20 bg-indigo-900">
-        <div className="container mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center text-white mb-2">What We Offer?</h2>
-            <div className="w-24 h-1 bg-yellow-400 mx-auto mb-12"></div>
-            <div className="space-y-8">
-                {services.slice(0, 6).map(service => (
-                     <div key={service.id} className="bg-white p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center gap-8">
-                        <img src={service.image} alt={service.title} className="w-48 h-auto" />
-                        <div className="flex-1">
-                            <h3 className="text-2xl font-bold text-gray-800 mb-3">{service.title}</h3>
-                            <p className="text-gray-600 mb-6">{service.description}</p>
+const WhatWeOffer = () => {
+    const offerings = [
+        { id: 1, title: 'Data Appending Enrichment', description: 'You Have a Lead List need Enrich with data Or contact person Email. We can help you to Enrich your Data. If You have an Old lead list And need to Update data then we can replace it with Update data. We can also Provide Missing Data From Various Sources and Valid Sources. We charge per row only 15 cents.', image: '/images/services/service-1.png' },
+        { id: 2, title: 'Email Appending Enrichment', description: 'You Have a Lead List that needs Enrich with the Owner or Decision makers Name and Email. We Provide any Decision makers contact Details.', image: '/images/services/service-2.png' },
+        { id: 3, title: 'Prospect List Building', description: 'We Have Some Targeted Companies. We are looking for their Decision makers Contact Details. We are here to help you to reach your goal. I Can Provide Linkedin Lead Generation Data.', image: '/images/services/service-3.png' },
+        { id: 4, title: 'Any Industry Leads', description: 'Here we Ready to provide any industry data. You just tell us about your targeted Industry Locations and Title/Role. You will get 100% valid data. We provide 100% Data accuracy Guarantee with 99% Emails Delivery Guarantee.', image: '/images/services/service-4.png' },
+        { id: 5, title: 'Email Finding', description: 'Do You Have a List? And Looking For their Valid Emails. Here We can provide 99% Delivery able Emails. Just Share your list with us. We provide valid emails for only 15 cents.', image: '/images/services/service-5.png' },
+        { id: 6, title: 'Direct Number Finding', description: 'We are looking For Contact Person Direct Dials Number and cell phone number/Mobile Number. Here We provide any contact person direct dials number and cell phone number at only 15 cents.', image: '/images/services/service-6.png' },
+        { id: 7, title: 'Skip Tracing', description: 'You only have a Person name and their Mailing address or home address. You are looking for their Cell/Direct phone number and Email. We can provide those contact details.', image: '/images/services/service-7.png' }
+    ];
+
+    return (
+        <section className="py-20 bg-indigo-900">
+            <div className="container mx-auto px-6">
+                <h2 className="text-3xl font-bold text-center text-white mb-2">What We Offer?</h2>
+                <div className="w-24 h-1 bg-yellow-400 mx-auto mb-12"></div>
+                <div className="space-y-8">
+                    {offerings.map(service => (
+                         <div key={service.id} className="bg-white p-8 rounded-2xl shadow-lg flex flex-col md:flex-row items-center gap-8">
+                            <img src={service.image} alt={service.title} className="w-48 h-auto" />
+                            <div className="flex-1">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-3">{service.title}</h3>
+                                <p className="text-gray-600 mb-6">{service.description}</p>
+                            </div>
+                            <button className="bg-indigo-800 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-900 transition duration-300 self-start md:self-center whitespace-nowrap">
+                               Pricing & Details
+                            </button>
                         </div>
-                        <button className="bg-indigo-800 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-900 transition duration-300 self-start md:self-center whitespace-nowrap">
-                           Pricing & Details
-                        </button>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
-        </div>
-    </section>
-);
+        </section>
+    );
+};
 
 const OurWork = ({ id }: { id?: string }) => (
     <section id={id} className="py-20 bg-white">
